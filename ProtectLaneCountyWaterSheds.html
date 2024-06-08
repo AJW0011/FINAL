@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <title>Protect Lane County Watersheds</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!--    The Mapbox JavaScript here in the <head> of the page    -->
+      <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
+    <!--    The Mapbox CSS here in the <head> of the page    -->
+      <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+      
+      <!--   Link to Google font (CHANGE THIS TO BE MORE READABLE-->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+
+      
+    <style>
+        /* CSS code between the <style> tags */
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+        
+        /* Overrides the pop-up width slightly bigger min-width than the default Mapbox CSS*/
+         .mapboxgl-popup {
+            min-width: 325px; 
+            max-width: 500px;
+        }
+
+        /*CSS for the reset view button  */
+        .pitch2d {
+            display: inline-block; /* displays over the map */
+            position: absolute; /* displays over the map */
+            z-index: 1;
+            margin: 0px auto; 
+            margin-left: 5px;
+            margin-top: 450px;
+            width: 8%;  /* width of parent div */
+            padding: 10px;
+            border-style: solid;
+            border-color: oldlace;
+            border-radius: 3px; /* rounded corners */
+            font-size: 1em;
+            text-align: center;
+            font-weight: bold;
+            color: oldlace;
+            background: #02004D;
+            cursor:pointer;
+        }
+        
+        /* Button CSS*/
+        button {
+            font-family: 'Rubik', sans-serif; font-weight: 600;}
+        /* CSS for Popups */
+         .mapboxgl-popup {
+       min-width: 325px;
+             background: #02004D;
+       /*popup font CSS */
+       font-family: 'Rubik', sans-serif; cursor:auto;} 
+        
+        /*sidebar CSS*/
+            .watershed-info {
+      position: absolute;
+      font-family: sans-serif;
+      margin-top: 350px;
+      margin-left: 5px;
+      padding: 5px;
+      width: 15%;
+      border: 2px solid black;
+      font-size: 14px;
+      color: #222;
+      background-color: #fff;
+      border-radius: 3px;
+    }
+
+           /*Title box CSS*/
+            .title_box {
+      position: absolute;
+      font-family: sans-serif;
+      margin-top: 50px;
+      margin-left: 5px;
+      padding: 5px;
+      width: 15%;
+      border: 2px solid black;
+      font-size: 14px;
+      color: #222;
+      background-color: #fff;
+      border-radius: 3px;
+    }
+       
+ 
+    </style>
+  </head>
+
+  <body>
+      <!--   map div -->
+      <div id='map'></div>
+      
+       <!--  Button elements  -->
+        <button class='pitch2d' id='2dButton'>Reset View</button>
+<!--      <button class='pitch3d' id='3dButton'>3D</button>-->
+        
+<!--      sidebar div-->
+        <div class="watershed-info">
+          <div><strong>HU8 WATERSHED BREAKDOWN</strong></div>
+<!--          <div>Hydrological Unit 8 divides the US into 2,262 watersheds</div>-->
+          <div><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Click watershed for info)</strong>&nbsp;</div>
+          <div><strong>Name:</strong>&nbsp;<span id="name"></span></div>
+          <div><strong>Area(km²):</strong>&nbsp;<span id="areasqkm"></span></div>
+        </div>
+      
+<!--      title box div-->
+      
+    <div class="title_box">
+          <div><h3>PROTECT LANE COUNTY <br> WATERSHEDS</h3>
+            Map showing the watersheds of Lane County
+           using HU8 Hydrological Units<br>
+          <br>
+            <strong>Data Sources:</strong><br>
+            HU data sourced from Oregon Spatial Data Library:<a href="https://spatialdata.oregonexplorer.info/geoportal/details;id=4b1b008d5a764a209b2df040689c0779" target="_blank"> Source </a>
+            <br>
+            County boundaries sourced from OregonGEOHub:<a href="https://geohub.oregon.gov/datasets/c1aab8a6dab44577b98101cd17fa89c2/explore" target="_blank"> Source </a>
+            <br>
+            Uran Growth Boundary data sourced from OregonGEOHub:<a href="https://geohub.oregon.gov/datasets/a020f978338647b59b9bb19590c82497/about" target="_blank"> Source </a>
+        </div>
+   
+        
+    <script>
+        
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWp3MDAxMSIsImEiOiJjbHVsazc5bTgwMTd5Mmpva3Axc2x5Mjc5In0.KBuprNTg5z4as4twIVgsAA';
+
+        
+// Setting 'bounds' as extents of the map, so user can't escape and get lost hehehehe
+        
+             var bounds = [
+         [-125.04121696014056, 42.92702353407236], // Southwest coordinates
+         [-120.32010954650279, 45.16156562686629] // Northeast coordinates
+     ];
+        
+        
+//         Initialize the map
+        var map = new mapboxgl.Map({
+            container: 'map', 
+            style: 'mapbox://styles/ajw0011/clw9ly11k009s01pofaal9ud3',
+            center: [-123.086754, 44.052071],
+            bearing: 0,
+            zoom: 6.5,
+            minZoom: 6,
+            maxZoom: 9,
+            maxBounds: bounds,
+            bearing: 0,
+            pitch: 0,
+            cursor: 'default'
+        });
+//          navigation tools 
+        
+        
+        const nav = new mapboxgl.NavigationControl({
+    visualizePitch: true
+});
+map.addControl(nav, 'bottom-left');
+        
+//setting watershed id as an empty element
+        
+       watershedContent = {};
+        
+// on click, gets the properties of the watersheds later
+        
+        map.on('click', 'Watersheds', (e) => {
+             console.log(e.features[0])
+             id=e.features[0].properties.ObjectID
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(watershedContent[id])
+                .addTo(map);
+        });
+
+
+/*** ON LOAD ***/
+        //once map has loaded, add interactive data layer on top
+
+    map.on('load', function() {
+        
+        map.addSource('WatershedSource', {
+            type: 'vector',
+            url: 'mapbox://ajw0011.3zhv43g0',
+            generateId: true
+        });
+        
+        
+        map.addLayer({
+            'id': 'Watersheds',
+            'generateId' : true,
+            'type': "fill",
+            'source': 'WatershedSource',
+            'source-layer': 'HU8NEW-5wekom', //source layer name
+          'paint': {
+              "fill-opacity":0.01,
+               }       
+        });
+          
+        
+        }); 
+        
+        
+        // update information sidebar when hovering over watershed
+        //gets info from data layer on mouse enter
+        map.on('click','Watersheds', (e) => {
+            console.log(e.features[0]);
+            
+        // displays fetched info in info window
+        document.getElementById('name').innerHTML=e.features[0].properties.name;
+        document.getElementById('areasqkm').innerHTML=e.features[0].properties.areasqkm;
+            
+        
+        });
+        // Change the cursor to a pointer when
+        // the mouse is over the watershed layer.
+        map.on('mouseenter', 'Watersheds', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change the cursor back to a pointer
+        // when it leaves the water layer.
+        map.on('mouseleave', 'Watersheds', () => {
+            map.getCanvas().style.cursor = 'default';
+        });
+ 
+// adds constants that will get data from layer and display in sidebar next to the matching <span>        
+const nameDisplay = document.getElementById('name');
+const areaDisplay = document.getElementById('areasqkm');
+
+       
+//    /***  POPUPS  ***/ CHANGE TO INFO WINDOW
+//      add popups for when each watershed is clicked, maybe small name only popup on mouseover 
+        // Popup for Alsea Watershed  
+         watershedContent[19] = '<h2>Alsea</h2>';
+         watershedContent[19] += '<a href="https://oregonwild.org/exploring-alsea-watershed-and-stewardship-science-parts-i-ii" target="_blank">Click here </a>for more info from Oregon Wild'; 
+//         // Popup for Coast Fork Watershed  
+         watershedContent[56] = '<h2>Coast Fork Willamette</h2>';
+         watershedContent[56] += '<a href="https://www.protectlanecountywatersheds.org/coast_fork" target="_blank">Click here </a> for more info from PLCW';
+          // Popup for Siuslaw Watershed
+        watershedContent[12] = '<h2>Siuslaw</h2>';
+         watershedContent[12] += '<a href="https://www.protectlanecountywatersheds.org/siuslaw_watershed" target="_blank">Click here </a> for more info from PLCW';
+        // Popup for Siltcoos Watershed
+         watershedContent[18] = '<h2>Siltcoos</h2>';
+         watershedContent[18] += '<a href="https://www.fs.usda.gov/recarea/siuslaw/recarea/?recid=42515" target="_blank">Click here </a> for more info from US Forest Service'; 
+        // Popup for Middle Fork Willamette Watershed
+         watershedContent[34] = '<h2>Middle Fork Willamette</h2>';
+         watershedContent[34] += '<a href="https://www.protectlanecountywatersheds.org/middle_fork_willamette_watershed" target="_blank">Click here </a> for more info from PLCW' ; 
+        // Popup for McKenzie Watershed
+         watershedContent[6] = '<h2>McKenzie</h2>';
+         watershedContent[6] += '<a href="https://www.protectlanecountywatersheds.org/mckenzie_watershed" target="_blank">Click here </a> for more info from PLCW';
+        // Popup for Upper Willamette Watershed
+         watershedContent[3] = '<h2>Upper Willamette</h2>';
+         watershedContent[3] += '<a href="https://oregonexplorer.info/content/upper-willamette-watershed?topic=56&ptopic=98" target="_blank">Click here </a> for more info from Oregon Explorer'; 
+        // Popup for Umpqua Watershed
+         watershedContent[14] = '<h2>Umpqua</h2>';
+         watershedContent[14] += '<a href="https://oregonexplorer.info/content/umpqua-watershed-councils-0?topic=176&ptopic=140" target="_blank">Click here </a> for more info from Oregon Explorer'; 
+        // Popup for North Umpqua Watershed
+         watershedContent[92] = '<h2>North Umpqua</h2>';
+         watershedContent[92] += '<a href="https://oregonexplorer.info/content/upper-north-umpqua-river-watershed?topic=56&ptopic=98" target="_blank">Click here </a> for more info from Oregon Explorer'; 
+    /***  END POPUPS  ***/  
+
+
+/***  LISTENERS  ***/
+       //          creates function that halts camera rotation        
+//        function stopCamera(timestamp2) {
+//        map.rotateTo(0, {duration:0});
+//        requestAnimationFrame(stopCamera);
+//    }; 
+       /***  2D BUTTONS  ***/
+        document.getElementById('2dButton').addEventListener('click', function (){
+//            map.setPitch(0) // enable when elevation data is added
+            map.setBearing(0) // resets bearing
+            map.setZoom(7.8) // resets zoom
+            map.setCenter([-123.086754, 44.052071])
+//            {stopCamera(0);}  //      stops camera rotaion (enable when elevation data is added)
+    });
+        /***  3D BUTTONS  ***/
+//       creates function that rotates the camera (enable when elevation data is added)
+ /*      function rotateCamera(timestamp) {
+        // clamp the rotation between 0 -360 degrees
+        // Divide timestamp by 100 to slow rotation to ~10 degrees / sec
+        map.rotateTo((timestamp / 100) % 360, { duration: 0 });
+        // Request the next frame of the animation.
+        requestAnimationFrame(rotateCamera);
+    };*/
+//        when 3d button is clicked, (enable when elevation data is added)
+        /*document.getElementById('3dButton').addEventListener('click', function (){
+            map.setPitch(60, {duration: 4000}) // pitch is set to 60, allowing the elevation data to be seen
+            map.setBearing(0, {duration: 4000}) // resets bearing
+            map.setZoom(7.5, {duration: 4000}) // resets zoom
+            map.setCenter([-123.086754, 44.052071], {duration: 4000})
+            {rotateCamera(0);}  //       animates camera to give 360 view of elevation when 3d button is clicked                                      
+            //        call the elevation data for 3d visualisation
+            
+        });*/
+
+        
+        
+/***  END LISTENERS  ***/
+
+    </script>
+
+  </body>
+
+</html>
